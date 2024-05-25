@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+from datetime import datetime, timedelta
 import time
 
 # Base URL to get stock page
@@ -39,9 +40,6 @@ def scrollDown(ticker):
     for i in range(5):
         # Scroll down to the bottom of the page
         browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-        # Wait for 2 seconds for the page to load
-        time.sleep(2)    
 
 # Loop through each stock ticker
 for ticker in tickers:
@@ -75,17 +73,37 @@ for ticker, newsItem in news.items():
         timeTag = item.find('div', class_='publishing')
 
         # Check if the title and time exist
-        if titleTag and timeTag:
-            # Get title
-            title = titleTag.text
+        if not titleTag or not timeTag:
+            continue
+    
+        # Get title
+        title = titleTag.text
 
-            # Clean the time
-            rawTime = timeTag.text.strip()
-            # Format has to be '• time'
-            if '•' not in rawTime:
-                continue
-            timeParts= rawTime.split('•')
-            if len(timeParts) > 1:
-                cleanedTime = timeParts[-1].strip()
-            else:
-                cleanedTime = rawTime
+        # Clean the time
+        rawTime = timeTag.text.strip()
+
+        # Format has to be '• time'
+        if '•' not in rawTime:
+            continue
+        timeParts= rawTime.split('•')
+        if len(timeParts) > 1:
+            cleanedTime = timeParts[-1].strip()
+        else:
+            cleanedTime = rawTime
+
+        # Turn time into a date
+        if not cleanedTime:
+            continue
+
+        if 'ago' in cleanedTime:
+            publishedDate = datetime.now()
+        elif 'yesterday' in cleanedTime:
+            publishedDate = datetime.now() - timedelta(days=1)
+        else:
+            days = int(cleanedTime.split(' ')[0])
+            publishedDate = datetime.now() - timedelta(days=days)
+
+        # Format the date
+        formattedDate = publishedDate.strftime('%m/%d/%Y')
+
+        print([ticker, title, formattedDate], end='\n')
