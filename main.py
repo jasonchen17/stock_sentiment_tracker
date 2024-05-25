@@ -37,7 +37,7 @@ def scrollDown(ticker):
     browser.implicitly_wait(10)
 
     # Scroll 5 pages of news
-    for i in range(5):
+    for i in range(30):
         # Scroll down to the bottom of the page
         browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
@@ -46,20 +46,14 @@ for ticker in tickers:
     # Scroll down the page to render more news
     scrollDown(ticker)
 
-    # URL for the stock ticker
-    url = yahoo_finance_url.format(ticker)
-
-    # Send a request to the URL
-    req = Request(url=url, headers={'user-agent': 'Mozilla/5.0'})
-
-    # Get the response from the URL
-    response = urlopen(req)
+    # Get the page source after scrolling
+    html = browser.page_source
 
     # Parse the HTML content of the web page
-    html = BeautifulSoup(response, features='html.parser')
+    soup = BeautifulSoup(html, features='html.parser')
 
     # Get item which holds all the news
-    newsItem = html.find_all('li', class_='stream-item')
+    newsItem = soup.find_all('li', class_='stream-item')
 
     # Store item in dictionary
     news[ticker] = newsItem
@@ -95,7 +89,7 @@ for ticker, newsItem in news.items():
         if not cleanedTime:
             continue
 
-        if 'ago' in cleanedTime:
+        if 'hours' in cleanedTime:
             publishedDate = datetime.now()
         elif 'yesterday' in cleanedTime:
             publishedDate = datetime.now() - timedelta(days=1)
@@ -107,3 +101,6 @@ for ticker, newsItem in news.items():
         formattedDate = publishedDate.strftime('%m/%d/%Y')
 
         print([ticker, title, formattedDate], end='\n')
+
+# Quit the browser
+browser.quit()
