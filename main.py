@@ -8,16 +8,13 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-from datetime import datetime, timedelta
-import time
-
-# Base URL to get stock page
-yahoo_finance_url = 'https://finance.yahoo.com/quote/{}/news'
+from helpers import get_top_5_stocks_by_marketcap, format_time
 
 # List of stock tickers
-tickers = ['AMZN']
+tickers = get_top_5_stocks_by_marketcap()
 
 # Dictionary to store the news tables
+# key: stock ticker, value: news
 news = {}
 
 # Open the browser in headless mode
@@ -25,8 +22,8 @@ chrome_options = Options()
 chrome_options.add_argument('--headless')
 browser = webdriver.Chrome(options=chrome_options)
 
-# Function to scroll down the page to render more news
-def scrollDown(ticker):
+# Loop through each stock ticker
+for ticker in tickers:
     # URL to get the news
     url = f'https://finance.yahoo.com/quote/{ticker}/news'
 
@@ -36,15 +33,9 @@ def scrollDown(ticker):
     # Wait for 10 seconds for the page to load
     browser.implicitly_wait(10)
 
-    # Scroll 5 pages of news
-    for i in range(30):
+    for i in range(5):
         # Scroll down to the bottom of the page
         browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-# Loop through each stock ticker
-for ticker in tickers:
-    # Scroll down the page to render more news
-    scrollDown(ticker)
 
     # Get the page source after scrolling
     html = browser.page_source
@@ -53,54 +44,28 @@ for ticker in tickers:
     soup = BeautifulSoup(html, features='html.parser')
 
     # Get item which holds all the news
-    newsItem = soup.find_all('li', class_='stream-item')
+    news_items = soup.find_all('li', class_='stream-item')
 
     # Store item in dictionary
-    news[ticker] = newsItem
-
-# Iterate through the news items
-for ticker, newsItem in news.items():
-    # Iterate through each news item
-    for item in newsItem:
-        # Get the title and time of the news
-        titleTag = item.find('h3')
-        timeTag = item.find('div', class_='publishing')
-
-        # Check if the title and time exist
-        if not titleTag or not timeTag:
-            continue
-    
-        # Get title
-        title = titleTag.text
-
-        # Clean the time
-        rawTime = timeTag.text.strip()
-
-        # Format has to be '• time'
-        if '•' not in rawTime:
-            continue
-        timeParts= rawTime.split('•')
-        if len(timeParts) > 1:
-            cleanedTime = timeParts[-1].strip()
-        else:
-            cleanedTime = rawTime
-
-        # Turn time into a date
-        if not cleanedTime:
-            continue
-
-        if 'hours' in cleanedTime:
-            publishedDate = datetime.now()
-        elif 'yesterday' in cleanedTime:
-            publishedDate = datetime.now() - timedelta(days=1)
-        else:
-            days = int(cleanedTime.split(' ')[0])
-            publishedDate = datetime.now() - timedelta(days=days)
-
-        # Format the date
-        formattedDate = publishedDate.strftime('%m/%d/%Y')
-
-        print([ticker, title, formattedDate], end='\n')
+    news[ticker] = news_items
 
 # Quit the browser
 browser.quit()
+
+# Iterate through the news items
+for ticker, news_items in news.items():
+    # Iterate through each news item
+    for item in news_items:
+        # Get the title and time of the news
+        title_tag = item.find('h3')
+        time_tag = item.find('div', class_='publishing')
+    
+        if not title_tag or not time_tag:
+            continue
+
+        # Get title and time
+        title = title_tag.text
+        time = format_time(time_tag.text)
+
+        if not time:
+            continue
