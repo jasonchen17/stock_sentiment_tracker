@@ -1,6 +1,3 @@
-# Used to send HTTP requests and retrieve data from the web
-from urllib.request import urlopen, Request
-
 # Used to parse the HTML content of the web page
 from bs4 import BeautifulSoup
 
@@ -8,13 +5,17 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import pandas as pd
+import matplotlib.pyplot as plt
+
 from helpers import get_top_5_stocks_by_marketcap, format_time
 
 # List of stock tickers
 tickers = get_top_5_stocks_by_marketcap()
 
 # Dictionary to store the news tables
-# key: stock ticker, value: news
+# key: stock ticker, value: news table
 news = {}
 
 # Open the browser in headless mode
@@ -52,6 +53,9 @@ for ticker in tickers:
 # Quit the browser
 browser.quit()
 
+# Store (ticker, title, date) in a list
+data = []
+
 # Iterate through the news items
 for ticker, news_items in news.items():
     # Iterate through each news item
@@ -65,7 +69,31 @@ for ticker, news_items in news.items():
 
         # Get title and time
         title = title_tag.text
-        time = format_time(time_tag.text)
+        date = format_time(time_tag.text)
 
-        if not time:
+        if not date:
             continue
+
+        data.append((ticker, date, title))
+
+# Create a DataFrame from the data
+# df = pd.DataFrame(data, columns=['ticker', 'date', 'title'])
+# vader = SentimentIntensityAnalyzer()
+# f = lambda title: vader.polarity_scores(title)['compound']
+# df['compound'] = df['title'].apply(f)
+# df['date'] = pd.to_datetime(df['date']).dt.date  # Convert 'date' to date only
+
+# plt.figure(figsize=(10,8))
+# mean_df = df.groupby(['date', 'ticker'])['compound'].mean().unstack()
+
+# # Group by date and calculate the mean sentiment score for each ticker
+# mean_df = mean_df.groupby(mean_df.index).mean()
+
+# # Plot the bar chart
+# ax = mean_df.plot(kind='bar', rot=45)
+# ax.set_xlabel('Date')
+# ax.set_ylabel('Sentiment Score')
+# ax.legend(title='Ticker', bbox_to_anchor=(1.05, 1), loc='upper left')
+
+# plt.tight_layout()
+# plt.show()

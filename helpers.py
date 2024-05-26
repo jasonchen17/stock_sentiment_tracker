@@ -59,6 +59,4 @@ def format_time(raw_time):
         days = int(cleaned_time.split(' ')[0])
         published_date = datetime.now() - timedelta(days=days)
 
-    # Format the date
-    formatted_date = published_date.strftime('%m/%d/%Y')
-    return formatted_date
+    return published_date
