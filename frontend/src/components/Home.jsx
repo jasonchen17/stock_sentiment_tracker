@@ -89,6 +89,7 @@ function Home() {
 
     const roundedMaxSentiment = roundUp(maxSentiment);
 
+    //<Legend className="custom-legend" verticalAlign="top" />
     return (
         <Layout>
             <NavBar>
@@ -96,13 +97,24 @@ function Home() {
             </NavBar>
             <StyledContainer>
                 <div className="chart-container">
+                    <h1>Sentiment Score Chart</h1>
                     <ResponsiveContainer>
                         <BarChart data={chartData}>
-                            <CartesianGrid />
-                            <XAxis dataKey="date" />
-                            <YAxis domain={[-roundedMaxSentiment, roundedMaxSentiment]} />
-                            <Tooltip />
-                            <Legend />
+                            <CartesianGrid opacity={0.5} vertical={false}/>
+                            <XAxis 
+                                dataKey="date"
+                                axisLine={false}
+                                tickLine={false}
+                                tickFormatter={(date) => { 
+                                    { return format(date, 'MMM, d'); }
+                                }}
+                            />
+                            <YAxis 
+                                domain={[-roundedMaxSentiment, roundedMaxSentiment]} 
+                                axisLine={false}
+                                tickLine={false}
+                            />
+                            <Tooltip content={CustomTooltip} />
                             {topFiveStocks[0].map((stock, index) => (
                                 <Bar key={index} dataKey={stock} fill={colors[index]} />
                             ))}
@@ -121,8 +133,8 @@ function Home() {
                     {topFiveStocks[0].map((stock, index) => (
                         <div key={index} className="table-row" color={colors[index]}>
                             <div className="rank-cell">{index + 1}</div>
-                            <div className="name-cell">{topFiveStocks[1][index]}</div>
                             <div className="ticker-cell">{stock}</div>
+                            <div className="name-cell">{topFiveStocks[1][index]}</div>
                         </div>
                     ))}
                 </div>
@@ -131,23 +143,34 @@ function Home() {
     );
 }
 
+function CustomTooltip({ active, payload, label }) {
+    if (active) {
+        return (
+            <div className="tooltip">
+                <h4>{format(label, "eeee, d MMM, yyyy")}</h4>
+                {payload.map((stock, index) => (
+                    <p key={index} style={{ color: stock.color }}>
+                        {stock.name}: {stock.value}
+                    </p>
+                ))}
+            </div>
+        );
+    }
+}
+
 const Layout = styled.div`
     display: flex;
     flex-direction: column;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    list-style: none;
-    font-family: Geneva, Verdana, sans-serif;
+    gap: 10px;
 `;
 
 const NavBar = styled.div`
     display: flex;
-    justify-content: center;
     width: 100%;
     height: 100px;
     align-items: center;
-    border-bottom: 2px solid;
+    justify-content: center;
+    font-size: 1.5rem;
 `;
 
 const StyledContainer = styled.div`
@@ -155,28 +178,77 @@ const StyledContainer = styled.div`
     width: 100%;
     height: 500px;
 
+    @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 0;
+    }
+
     .chart-container {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        border: 2px solid;
+        border-radius: 10px;
+        margin: 30px;
+        padding: 20px;
+        padding-top: 0;
+
+        h1 {
+            text-align: left;
+            padding-bottom: 15px;
+        }
+    }
+
+.table-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    border: 2px solid;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 30px;
+    padding-top: 0;
+
+    .table-header,
+    .table-row {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid;
+    }
+
+    .table-header {
+        font-weight: bold;
+        font-size: 1.2rem;
+        
+    }
+
+    .table-row {
+        font-size: 1.1rem;
+    }
+
+    div {
         flex: 1;
     }
 
-    .table-container {
-        flex: 1;
-        
-        .table-header,
-        .table-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        }
+    .rank-header,
+    .name-header,
+    .ticker-header,
+    .rank-cell,
+    .name-cell,
+    .ticker-cell {
+        margin: 10px;
+    }
+}
 
-        .rank-header,
-        .name-header,
-        .ticker-header,
-        .rank-cell,
-        .name-cell,
-        .ticker-cell {
-        flex: 1;
-        padding: 8px;
+    .tooltip {
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: left;
+        margin: 100px;
+        margin-top: 50px;
+        h4 {
+            margin-bottom: 10px;
+            text-align: center;
         }
     }
 `;
