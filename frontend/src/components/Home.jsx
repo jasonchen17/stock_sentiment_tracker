@@ -3,6 +3,7 @@ import axios from 'axios';
 
 function Home() {
     const [data, setData] = useState([]);
+    const [topFiveStocks, setTopFiveStocks] = useState([]);
 
     const fetchData = async () => {
         try {
@@ -13,18 +14,35 @@ function Home() {
         }
     }
 
+    const fetchTopFiveStocks = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/top-5-stocks');
+            setTopFiveStocks(response.data.top_5_stocks);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     useEffect(() => {
+        fetchTopFiveStocks();
         fetchData();
     }, []);
     return (
     <div>
-      <ul>
+        <ul>
+            {topFiveStocks.map((stock, index) => (
+                <li key={index}>
+                    {stock}
+                </li>
+            ))}
+        </ul>
+        <ul>
         {data.map((item, index) => (
-          <li key={index}>
+            <li key={index}>
             {item.ticker}, {item.date}, {item.sentiment_score}
-          </li>
+            </li>
         ))}
-      </ul>
+        </ul>
     </div>
     );
 }

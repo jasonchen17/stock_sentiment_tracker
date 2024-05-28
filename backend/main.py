@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime
+from scraper.helpers import get_top_5_stocks_by_marketcap
 
 app = Flask(__name__)
 CORS(app)
@@ -56,7 +57,12 @@ def get_sentiments():
             'sentiment_score': sentiment.sentiment_score
         })
 
-    return jsonify(result)
+    return jsonify(result), 200
+
+@app.route('/top-5-stocks', methods=['GET'])
+def top_5_stocks():
+    tickers = get_top_5_stocks_by_marketcap()
+    return jsonify({'top_5_stocks': tickers}), 200
 
 if __name__ == '__main__':
     with app.app_context():
