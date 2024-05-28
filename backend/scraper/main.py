@@ -14,8 +14,8 @@ from helpers import get_top_5_stocks_by_marketcap, format_time
 
 def get_sentiment_data():
     # List of stock tickers
-    tickers = get_top_5_stocks_by_marketcap()
-
+    tickers = get_top_5_stocks_by_marketcap()[0]
+    
     # Dictionary to store the news tables
     # key: stock ticker, value: news table
     news = {}

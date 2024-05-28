@@ -16,11 +16,11 @@ def get_top_5_stocks_by_marketcap():
 
     rows = html.find_all('tr', {'class': 'styled-row is-hoverable is-bordered is-rounded is-striped has-color-text'})
 
-    tickers = []
+    stocks = [[] for i in range(2)]
     company_names = set()
 
     for row in rows:
-        if len(tickers) == 5:
+        if len(stocks[0]) == 5:
             break
 
         ticker = row.find('a', {'class': 'tab-link'}).text.strip()
@@ -29,10 +29,11 @@ def get_top_5_stocks_by_marketcap():
         if company_name in company_names:
             continue
 
-        tickers.append(ticker)
+        stocks[0].append(ticker)
+        stocks[1].append(company_name)
         company_names.add(company_name)
 
-    return tickers
+    return stocks
 
 
 def format_time(raw_time):
