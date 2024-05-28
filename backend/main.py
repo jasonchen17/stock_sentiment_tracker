@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime
 from scraper.helpers import get_top_5_stocks_by_marketcap
+from cachetools import cached, TTLCache
 
 app = Flask(__name__)
 CORS(app)
@@ -61,8 +62,12 @@ def get_sentiments():
 
 @app.route('/top-5-stocks', methods=['GET'])
 def top_5_stocks():
-    tickers = get_top_5_stocks_by_marketcap()
+    tickers = get_cached_top_5_stocks()
     return jsonify({'top_5_stocks': tickers}), 200
+
+@cached(cache=TTLCache(maxsize=1, ttl=3600))
+def get_cached_top_5_stocks():
+    return get_top_5_stocks_by_marketcap()
 
 if __name__ == '__main__':
     with app.app_context():
