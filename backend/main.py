@@ -4,7 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime
 from scraper.helpers import get_top_5_stocks_by_marketcap
-from cachetools import cached, TTLCache
+from flask_caching import Cache
+
 
 app = Flask(__name__)
 CORS(app)
@@ -12,6 +13,8 @@ CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:password123@localhost/stock_sentiment_db'
 
 db = SQLAlchemy(app)
+
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 class Sentiment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -61,13 +64,12 @@ def get_sentiments():
     return jsonify(result), 200
 
 @app.route('/top-5-stocks', methods=['GET'])
+@cache.cached(timeout=3600)
 def top_5_stocks():
-    tickers = get_cached_top_5_stocks()
+    tickers = get_top_5_stocks_by_marketcap()
     return jsonify({'top_5_stocks': tickers}), 200
 
-@cached(cache=TTLCache(maxsize=1, ttl=3600))
-def get_cached_top_5_stocks():
-    return get_top_5_stocks_by_marketcap()
+
 
 if __name__ == '__main__':
     with app.app_context():
