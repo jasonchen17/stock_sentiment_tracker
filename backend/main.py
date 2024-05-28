@@ -1,11 +1,13 @@
-from flask import Flask
+import subprocess
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:password123@localhost/stock_sentiment_db'
 
 db = SQLAlchemy(app)
 
@@ -20,7 +22,44 @@ class Sentiment(db.Model):
         self.date = date
         self.sentiment_score = sentiment_score
 
+@app.route('/start-scraper', methods=['POST'])
+def start_scraper():
+    command = 'python scraper/main.py'
+    subprocess.Popen(command, shell=True)
+
+    return jsonify({'message': 'Scraper started successfully'}), 200
+
+@app.route('/sentiments', methods=['POST'])
+def submit_sentiment():
+    data = request.json
+
+    sentiment = Sentiment(
+        ticker = data.get('ticker'),
+        date = datetime.strptime(data.get('date'), '%Y-%m-%d'),
+        sentiment_score = data.get('sentiment_score')
+    )
+
+    db.session.add(sentiment)
+    db.session.commit()
+
+    return jsonify({'message': 'Sentiment data added successfully'}), 200
+
+# @app.route('/sentiments', methods=['GET'])
+# def get_sentiments():
+#     ticker = request.args.get('ticker')
+#     sentiments = Sentiment.query.filter_by(ticker=ticker).order_by(Sentiment.date.desc()).all()
+
+#     result = []
+#     for sentiment in sentiments:
+#         result.append({
+#             'ticker': sentiment.ticker,
+#             'date': sentiment.date.strftime('%Y-%m-%d'),
+#             'sentiment_score': sentiment.sentiment_score
+#         })
+
+#     return jsonify(result)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run()
+    app.run(debug=True)

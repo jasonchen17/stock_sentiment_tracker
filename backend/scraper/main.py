@@ -1,3 +1,5 @@
+import requests
+
 # Used to parse the HTML content of the web page
 from bs4 import BeautifulSoup
 
@@ -8,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 # Sentiment analyzer
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-from .helpers import get_top_5_stocks_by_marketcap, format_time
+from helpers import get_top_5_stocks_by_marketcap, format_time
 
 def get_sentiment_data():
     # List of stock tickers
@@ -93,26 +95,14 @@ def get_sentiment_data():
             mean_score = sum(scores) / len(scores)
             sentiment_data[ticker][date] = mean_score
 
-    return sentiment_data
+            # Send the data to the API
+            data = {
+                'ticker': ticker,
+                'date': date,
+                'sentiment_score': mean_score
+            }
+            response = requests.post('http://localhost:5000/sentiments', json=data)
+            print("Status code:", response.status_code)
 
-# Create a DataFrame from the data
-# df = pd.DataFrame(data, columns=['ticker', 'date', 'title'])
-# vader = SentimentIntensityAnalyzer()
-# f = lambda title: vader.polarity_scores(title)['compound']
-# df['compound'] = df['title'].apply(f)
-# df['date'] = pd.to_datetime(df['date']).dt.date  # Convert 'date' to date only
-
-# plt.figure(figsize=(10,8))
-# mean_df = df.groupby(['date', 'ticker'])['compound'].mean().unstack()
-
-# # Group by date and calculate the mean sentiment score for each ticker
-# mean_df = mean_df.groupby(mean_df.index).mean()
-
-# # Plot the bar chart
-# ax = mean_df.plot(kind='bar', rot=45)
-# ax.set_xlabel('Date')
-# ax.set_ylabel('Sentiment Score')
-# ax.legend(title='Ticker', bbox_to_anchor=(1.05, 1), loc='upper left')
-
-# plt.tight_layout()
-# plt.show()
+if __name__ == '__main__':
+    get_sentiment_data()
