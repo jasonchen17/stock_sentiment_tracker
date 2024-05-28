@@ -44,20 +44,19 @@ def submit_sentiment():
 
     return jsonify({'message': 'Sentiment data added successfully'}), 200
 
-# @app.route('/sentiments', methods=['GET'])
-# def get_sentiments():
-#     ticker = request.args.get('ticker')
-#     sentiments = Sentiment.query.filter_by(ticker=ticker).order_by(Sentiment.date.desc()).all()
+@app.route('/sentiments', methods=['GET'])
+def get_sentiments():
+    sentiments = Sentiment.query.all()
 
-#     result = []
-#     for sentiment in sentiments:
-#         result.append({
-#             'ticker': sentiment.ticker,
-#             'date': sentiment.date.strftime('%Y-%m-%d'),
-#             'sentiment_score': sentiment.sentiment_score
-#         })
+    result = []
+    for sentiment in sentiments:
+        result.append({
+            'ticker': sentiment.ticker,
+            'date': sentiment.date.strftime('%Y-%m-%d'),
+            'sentiment_score': sentiment.sentiment_score
+        })
 
-#     return jsonify(result)
+    return jsonify(result)
 
 if __name__ == '__main__':
     with app.app_context():
