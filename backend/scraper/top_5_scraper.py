@@ -1,3 +1,7 @@
+import sys
+import asyncio
+import aiohttp
+
 # Used to connect to API
 import requests
 
@@ -13,7 +17,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 from helpers import get_top_5_stocks_by_marketcap, format_time
 
-def get_sentiment_data():
+async def get_sentiment_data():
     tickers = get_top_5_stocks_by_marketcap()[0]
     
     # Dictionary to store the news tables
@@ -35,15 +39,18 @@ def get_sentiment_data():
         # Wait for 10 seconds for the page to load
         browser.implicitly_wait(10)
 
-        for i in range(5):
+        for i in range(10):
             # Scroll down to the bottom of the page
             browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            browser.implicitly_wait(2)
+
+        browser.implicitly_wait(3)
 
         # Get the page source after scrolling
         html = browser.page_source
 
         # Parse the HTML content of the web page
-        soup = BeautifulSoup(html, features='html.parser')
+        soup = BeautifulSoup(html, 'html.parser')
 
         # Get item which holds all the news
         news_items = soup.find_all('li', class_='stream-item')
@@ -53,52 +60,56 @@ def get_sentiment_data():
 
     browser.quit()
 
-    # Store (ticker, title, date) in a list
+    # Dictionary to store the sentiment scores
     sentiment_data = {ticker: {} for ticker in tickers}
     vader = SentimentIntensityAnalyzer()
 
-    for ticker, news_items in news.items():
-        for item in news_items:
-            # Get the title and time of the news
-            title_tag = item.find('h3')
-            time_tag = item.find('div', class_='publishing')
-        
-            if not title_tag or not time_tag:
-                continue
-
-            # Get title and time
-            title = title_tag.text
-            date = format_time(time_tag.text)
-
-            if not date:
-                continue
+    async with aiohttp.ClientSession() as session:
+        for ticker, news_items in news.items():
+            for item in news_items:
+                # Get the title and time of the news
+                title_tag = item.find('h3')
+                time_tag = item.find('div', class_='publishing')
             
-            # Format the date
-            date = date.strftime('%Y-%m-%d')
+                if not title_tag or not time_tag:
+                    continue
 
-            # Calculate the sentiment score for the title
-            sentiment_score = vader.polarity_scores(title)['compound']
+                # Get title and time
+                title = title_tag.text
+                date = format_time(time_tag.text)
 
-            # Store in sentiment_data
-            if date not in sentiment_data[ticker]:
-                sentiment_data[ticker][date] = []
-            sentiment_data[ticker][date].append(sentiment_score)
+                if not date:
+                    continue
+                
+                # Format the date
+                date = date.strftime('%Y-%m-%d')
 
-    # Calculate mean sentiment score for each date
-    for ticker in sentiment_data:
-        for date in sentiment_data[ticker]:
-            scores = sentiment_data[ticker][date]
-            mean_score = sum(scores) / len(scores)
-            sentiment_data[ticker][date] = mean_score
+                # Calculate the sentiment score for the title
+                sentiment_score = vader.polarity_scores(title)['compound']
 
-            # Send the data to the API
-            data = {
-                'ticker': ticker,
-                'date': date,
-                'sentiment_score': mean_score
-            }
-            response = requests.post('http://localhost:5000/sentiments', json=data)
-            print("Status code:", response.status_code)
+                # Store in sentiment_data
+                if date not in sentiment_data[ticker]:
+                    sentiment_data[ticker][date] = []
+                sentiment_data[ticker][date].append(sentiment_score)
+
+        # Calculate mean sentiment score for each date
+        for ticker in sentiment_data:
+            for date in sentiment_data[ticker]:
+                scores = sentiment_data[ticker][date]
+                mean_score = sum(scores) / len(scores)
+                sentiment_data[ticker][date] = mean_score
+
+                # Send the data to the API
+                data = {
+                    'ticker': ticker,
+                    'date': date,
+                    'sentiment_score': mean_score
+                }
+
+                async with session.post('http://localhost:5000/sentiments', json=data) as response:
+                    print("Status code:", response.status)
+
+    sys.exit(0)
 
 if __name__ == '__main__':
-    get_sentiment_data()
+    asyncio.run(get_sentiment_data())

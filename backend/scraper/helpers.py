@@ -52,7 +52,7 @@ def format_time(raw_time):
     if not cleaned_time:
         return None
 
-    if 'hours' in cleaned_time:
+    if 'hours' in cleaned_time or 'minutes' in cleaned_time:
         published_date = datetime.now()
     elif 'yesterday' in cleaned_time:
         published_date = datetime.now() - timedelta(days=1)
