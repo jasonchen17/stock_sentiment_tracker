@@ -56,8 +56,10 @@ def format_time(raw_time):
         published_date = datetime.now()
     elif 'yesterday' in cleaned_time:
         published_date = datetime.now() - timedelta(days=1)
-    else:
+    elif 'days' in cleaned_time:
         days = int(cleaned_time.split(' ')[0])
         published_date = datetime.now() - timedelta(days=days)
+    else:
+        return None
 
     return published_date

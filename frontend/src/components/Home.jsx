@@ -17,6 +17,30 @@ import { format, eachDayOfInterval, subDays } from 'date-fns';
 function Home() {
     const [data, setData] = useState([]);
     const [topFiveStocks, setTopFiveStocks] = useState([[], []]);
+    const [inputTicker, setInputTicker] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const inputTicker = e.target.elements.ticker.value;
+
+        try {
+            // Update inputTicker
+            setInputTicker(inputTicker);
+      
+            axios.post('http://localhost:5000/start-individual-scraper', {
+            ticker: inputTicker,
+            })
+            .then((response) => {
+                console.log(response.data.message);
+                fetchData();
+            })
+            .catch((error) => {
+                console.log(error.response.data.message);
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const fetchData = async () => {
         try {
@@ -89,54 +113,95 @@ function Home() {
 
     const roundedMaxSentiment = roundUp(maxSentiment);
 
-    //<Legend className="custom-legend" verticalAlign="top" />
+    const inputTickerData = data.filter(item => item.ticker === inputTicker);
+
     return (
         <Layout>
             <NavBar>
                 <h1>Stock Sentiment Analysis</h1>
             </NavBar>
             <StyledContainer>
-                <div className="chart-container">
-                    <h1>Sentiment Score Chart</h1>
-                    <ResponsiveContainer>
-                        <BarChart data={chartData}>
-                            <CartesianGrid opacity={0.5} vertical={false}/>
-                            <XAxis 
-                                dataKey="date"
-                                axisLine={false}
-                                tickLine={false}
-                                tickFormatter={(date) => { 
-                                    { return format(date, 'MMM, d'); }
-                                }}
-                            />
-                            <YAxis 
-                                domain={[-roundedMaxSentiment, roundedMaxSentiment]} 
-                                axisLine={false}
-                                tickLine={false}
-                            />
-                            <Tooltip content={CustomTooltip} />
-                            {topFiveStocks[0].map((stock, index) => (
-                                <Bar key={index} dataKey={stock} fill={colors[index]} />
-                            ))}
-                        </BarChart>
-                    </ResponsiveContainer>
+                <div className="main-container">
+                    <div className="chart-container">
+                        <h1>Sentiment Score Chart</h1>
+                        <ResponsiveContainer>
+                            <BarChart data={chartData}>
+                                <CartesianGrid opacity={0.5} vertical={false}/>
+                                <XAxis 
+                                    dataKey="date"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tickFormatter={(date) => { 
+                                        { return format(date, 'MMM, d'); }
+                                    }}
+                                />
+                                <YAxis 
+                                    domain={[-roundedMaxSentiment, roundedMaxSentiment]} 
+                                    axisLine={false}
+                                    tickLine={false}
+                                />
+                                <Tooltip content={CustomTooltip} />
+                                {topFiveStocks[0].map((stock, index) => (
+                                    <Bar key={index} dataKey={stock} fill={colors[index]} />
+                                ))}
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+
+                    <div className="table-container"> 
+                        <h1>Top Five Stocks by Market Cap</h1>
+                        <div className="table-header">
+                            <div className="rank-header">Rank</div>
+                            <div className="name-header">Name</div>
+                            <div className="ticker-header">Ticker</div>
+                        </div>
+                        
+                        {topFiveStocks[0].map((stock, index) => (
+                            <div key={index} className="table-row" color={colors[index]}>
+                                <div className="rank-cell">{index + 1}</div>
+                                <div className="ticker-cell">{stock}</div>
+                                <div className="name-cell">{topFiveStocks[1][index]}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="table-container"> 
-                    <h1>Top Five Stocks by Market Cap</h1>
-                    <div className="table-header">
-                        <div className="rank-header">Rank</div>
-                        <div className="name-header">Name</div>
-                        <div className="ticker-header">Ticker</div>
-                    </div>
-                    
-                    {topFiveStocks[0].map((stock, index) => (
-                        <div key={index} className="table-row" color={colors[index]}>
-                            <div className="rank-cell">{index + 1}</div>
-                            <div className="ticker-cell">{stock}</div>
-                            <div className="name-cell">{topFiveStocks[1][index]}</div>
+                <div className="search-container">
+                    <form onSubmit={handleSubmit}>
+                        <input 
+                            type="text" 
+                            name="ticker" 
+                            placeholder="Enter ticker" 
+                            autoComplete="off"
+                        />
+                        <button type="submit">Submit</button>
+                    </form>
+                
+                    <div className = "data-table">
+                        {inputTickerData.length > 0 && (
+                        <div className="sentiment-table-container">
+                        <h2>Sentiment Data for {inputTicker}</h2>
+                        <table>
+                        <thead>
+                        <tr>
+                        <th>Date</th>
+                        <th>Ticker</th>
+                        <th>Sentiment Score</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {inputTickerData.map((item, index) => (
+                        <tr key={index}>
+                        <td>{item.date}</td>
+                        <td>{item.ticker}</td>
+                        <td>{item.sentiment_score}</td>
+                        </tr>
+                        ))}
+                        </tbody>
+                        </table>
                         </div>
-                    ))}
+                        )}
+                    </div>
                 </div>
             </StyledContainer>
         </Layout>
@@ -158,6 +223,10 @@ function CustomTooltip({ active, payload, label }) {
     }
 }
 
+const SearchContainer = styled.div`
+    display: flex;
+`
+
 const Layout = styled.div`
     display: flex;
     flex-direction: column;
@@ -176,80 +245,107 @@ const NavBar = styled.div`
 const StyledContainer = styled.div`
     display: flex;
     width: 100%;
-    height: 500px;
+    flex-direction: column;
 
     @media (max-width: 768px) {
         flex-direction: column;
         gap: 0;
     }
 
-    .chart-container {
+    .main-container {
         display: flex;
-        flex-direction: column;
-        flex: 1;
-        border: 2px solid;
-        border-radius: 10px;
-        margin: 30px;
-        padding: 20px;
-        padding-top: 0;
+        height: 500px;
 
-        h1 {
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            border: 2px solid;
+            border-radius: 10px;
+            margin: 30px;
+            padding: 20px;
+            padding-top: 0;
+    
+            h1 {
+                text-align: left;
+                padding-bottom: 15px;
+            }
+        }
+    
+        .table-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            border: 2px solid;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px;
+            padding-top: 0;
+    
+            .table-header,
+            .table-row {
+                display: flex;
+                justify-content: space-between;
+                border-bottom: 1px solid;
+            }
+    
+            .table-header {
+                font-weight: bold;
+                font-size: 1.2rem;
+                
+            }
+    
+            .table-row {
+                font-size: 1.1rem;
+            }
+    
+            div {
+                flex: 1;
+            }
+    
+            .rank-header,
+            .name-header,
+            .ticker-header,
+            .rank-cell,
+            .name-cell,
+            .ticker-cell {
+                margin: 10px;
+            }
+        }
+    
+        .tooltip {
+            border-radius: 10px;
+            padding: 1rem;
             text-align: left;
-            padding-bottom: 15px;
+            margin: 100px;
+            margin-top: 50px;
+            h4 {
+                margin-bottom: 10px;
+                text-align: center;
+            }
         }
     }
 
-.table-container {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    border: 2px solid;
-    border-radius: 10px;
-    padding: 20px;
-    margin: 30px;
-    padding-top: 0;
-
-    .table-header,
-    .table-row {
+    .search-container {
         display: flex;
-        justify-content: space-between;
-        border-bottom: 1px solid;
-    }
+        margin: 30px;
+        height: 500px;
 
-    .table-header {
-        font-weight: bold;
-        font-size: 1.2rem;
-        
-    }
-
-    .table-row {
-        font-size: 1.1rem;
-    }
-
-    div {
-        flex: 1;
-    }
-
-    .rank-header,
-    .name-header,
-    .ticker-header,
-    .rank-cell,
-    .name-cell,
-    .ticker-cell {
-        margin: 10px;
-    }
-}
-
-    .tooltip {
+        border: 2px solid red;
         border-radius: 10px;
-        padding: 1rem;
-        text-align: left;
-        margin: 100px;
-        margin-top: 50px;
-        h4 {
-            margin-bottom: 10px;
-            text-align: center;
+
+        form {
+            flex: .2;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            display: flex;
         }
+
+        .data-table {
+            flex: 1;
+        }
+
     }
 `;
 

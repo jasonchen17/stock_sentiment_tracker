@@ -27,9 +27,9 @@ class Sentiment(db.Model):
         self.date = date
         self.sentiment_score = sentiment_score
 
-@app.route('/start-scraper', methods=['POST'])
-def start_scraper():
-    command = 'python scraper/main.py'
+@app.route('/start-top-5-scraper', methods=['POST'])
+def start_top_5_scraper():
+    command = 'python scraper/top_5_scraper.py'
     subprocess.Popen(command, shell=True)
 
     return jsonify({'message': 'Scraper started successfully'}), 200
@@ -51,7 +51,11 @@ def submit_sentiment():
 
 @app.route('/sentiments', methods=['GET'])
 def get_sentiments():
-    sentiments = Sentiment.query.all()
+    ticker = request.args.get('ticker')
+    if ticker:
+        sentiments = Sentiment.query.filter_by(ticker=ticker).all()
+    else:
+        sentiments = Sentiment.query.all()
 
     result = []
     for sentiment in sentiments:
@@ -69,7 +73,17 @@ def top_5_stocks():
     tickers = get_top_5_stocks_by_marketcap()
     return jsonify({'top_5_stocks': tickers}), 200
 
-
+@app.route('/start-individual-scraper', methods=['POST'])
+def start_individual_scraper():
+    ticker = request.json.get('ticker')
+    command = f'python scraper/individual_scraper.py {ticker}'
+    process = subprocess.Popen(command, shell=True)
+    process.wait()
+    
+    if process.returncode == 0:
+        return jsonify({'message': 'Individual scraper finished successfully'}), 200
+    else:
+        return jsonify({'message': 'Individual scraper failed'}), 500
 
 if __name__ == '__main__':
     with app.app_context():

@@ -1,3 +1,4 @@
+# Used to connect to API
 import requests
 
 # Used to parse the HTML content of the web page
@@ -13,7 +14,6 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from helpers import get_top_5_stocks_by_marketcap, format_time
 
 def get_sentiment_data():
-    # List of stock tickers
     tickers = get_top_5_stocks_by_marketcap()[0]
     
     # Dictionary to store the news tables
@@ -25,7 +25,6 @@ def get_sentiment_data():
     chrome_options.add_argument('--headless')
     browser = webdriver.Chrome(options=chrome_options)
 
-    # Loop through each stock ticker
     for ticker in tickers:
         # URL to get the news
         url = f'https://finance.yahoo.com/quote/{ticker}/news'
@@ -52,16 +51,13 @@ def get_sentiment_data():
         # Store item in dictionary
         news[ticker] = news_items
 
-    # Quit the browser
     browser.quit()
 
     # Store (ticker, title, date) in a list
     sentiment_data = {ticker: {} for ticker in tickers}
     vader = SentimentIntensityAnalyzer()
 
-    # Iterate through the news items
     for ticker, news_items in news.items():
-        # Iterate through each news item
         for item in news_items:
             # Get the title and time of the news
             title_tag = item.find('h3')
