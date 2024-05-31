@@ -15,7 +15,7 @@ from selenium.webdriver.chrome.options import Options
 # Sentiment analyzer
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-from helpers import get_top_5_stocks_by_marketcap, format_time
+from utils.get_top_5_stocks_by_marketcap import get_top_5_stocks_by_marketcap, format_time
 
 async def get_sentiment_data():
     tickers = get_top_5_stocks_by_marketcap()[0]

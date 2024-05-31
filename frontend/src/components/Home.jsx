@@ -177,29 +177,35 @@ function Home() {
                         <button type="submit">Submit</button>
                     </form>
                 
-                    <div className = "data-table">
-                        {inputTickerData.length > 0 && (
-                        <div className="sentiment-table-container">
-                        <h2>Sentiment Data for {inputTicker}</h2>
-                        <table>
-                        <thead>
-                        <tr>
-                        <th>Date</th>
-                        <th>Ticker</th>
-                        <th>Sentiment Score</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {inputTickerData.map((item, index) => (
-                        <tr key={index}>
-                        <td>{item.date}</td>
-                        <td>{item.ticker}</td>
-                        <td>{item.sentiment_score}</td>
-                        </tr>
-                        ))}
-                        </tbody>
-                        </table>
-                        </div>
+                    <div className="data-table">
+                        {inputTicker !== '' && inputTickerData.length === 0 && (
+                            <div className="error-message">
+                                <p>No news found or ticker doesn't exist.</p>
+                            </div>
+                        )}
+                        {inputTicker !== '' && inputTickerData.length > 0 && (
+                            <>
+                                <h2>Sentiment Score Chart for {inputTicker}</h2>
+                                <div style={{ height: '400px' }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={inputTickerData}>
+                                            <CartesianGrid opacity={0.5} vertical={false} />
+                                            <XAxis
+                                                dataKey="date"
+                                                axisLine={false}
+                                                tickLine={false}
+                                                tickFormatter={(date) => format(new Date(date), 'MMM, d')}
+                                            />
+                                            <YAxis
+                                                axisLine={false}
+                                                tickLine={false}
+                                            />
+                                            <Tooltip content={CustomTooltip} />
+                                            <Bar dataKey="sentiment_score" fill="#8884d8" />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </>
                         )}
                     </div>
                 </div>
@@ -222,10 +228,6 @@ function CustomTooltip({ active, payload, label }) {
         );
     }
 }
-
-const SearchContainer = styled.div`
-    display: flex;
-`
 
 const Layout = styled.div`
     display: flex;

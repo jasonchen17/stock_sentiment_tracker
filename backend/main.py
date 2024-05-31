@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime
-from scraper.helpers import get_top_5_stocks_by_marketcap
+from scraper.utils.get_top_5_stocks_by_marketcap import get_top_5_stocks_by_marketcap
 from flask_caching import Cache
 
 
@@ -76,6 +76,7 @@ def top_5_stocks():
 @app.route('/start-individual-scraper', methods=['POST'])
 def start_individual_scraper():
     ticker = request.json.get('ticker')
+    
     command = f'python scraper/individual_scraper.py {ticker}'
     process = subprocess.Popen(command, shell=True)
     process.wait()
