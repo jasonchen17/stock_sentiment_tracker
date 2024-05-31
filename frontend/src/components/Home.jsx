@@ -13,34 +13,11 @@ import {
 } from 'recharts';
 import styled from 'styled-components';
 import { format, eachDayOfInterval, subDays } from 'date-fns';
+import { Layout } from '../styles/Layout';
 
 function Home() {
     const [data, setData] = useState([]);
     const [topFiveStocks, setTopFiveStocks] = useState([[], []]);
-    const [inputTicker, setInputTicker] = useState('');
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const inputTicker = e.target.elements.ticker.value;
-
-        try {
-            // Update inputTicker
-            setInputTicker(inputTicker);
-      
-            axios.post('http://localhost:5000/start-individual-scraper', {
-            ticker: inputTicker,
-            })
-            .then((response) => {
-                console.log(response.data.message);
-                fetchData();
-            })
-            .catch((error) => {
-                console.log(error.response.data.message);
-            });
-        } catch (error) {
-            console.log(error);
-        }
-    };
 
     const fetchData = async () => {
         try {
@@ -68,39 +45,30 @@ function Home() {
     // Colors for each of the top 5 stocks
     const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'];
 
-    // Create array of past 7 dates and format them
+    // Create array of past 7 dates
     const currentDate = new Date();
     const pastSevenDates = eachDayOfInterval({ start: subDays(currentDate, 7), end: subDays(currentDate, 1) })
         .map(date => format(date, 'yyyy-MM-dd'));
 
-    // Iterate past 7 dates
     const chartData = pastSevenDates.map((date) => {
-        // Create object with date key
         const dateData = { date };
 
-        // Iterate top 5 stocks
         topFiveStocks[0].forEach((stock) => {
             let stockData = null;
 
-            // Find stock data for the current date
             data.forEach(item => {
-                // Check if the stock and date match
                 if (item.ticker === stock && item.date === date) {
                     stockData = item;
                 }
             });
-            // Add stock data to date object or 0 if no data found
             dateData[stock] = stockData ? stockData.sentiment_score : 0;
         });
         return dateData;
     });
 
-    // Create array of sentiment scores
+    // Set range of y-axis for readability
     const sentimentScores = data.map(item => item.sentiment_score);
-
-    // Find the absolute maximum sentiment score
     const maxSentiment = Math.max(...sentimentScores.map(Math.abs));
-
     const roundUp = (value) => {
         const factor = 10 ** Math.floor(Math.log10(value));
         const roundedValue = Math.ceil(value / factor) * factor;
@@ -110,10 +78,7 @@ function Home() {
             return roundedValue;
         }
     };
-
     const roundedMaxSentiment = roundUp(maxSentiment);
-
-    const inputTickerData = data.filter(item => item.ticker === inputTicker);
 
     return (
         <Layout>
@@ -165,50 +130,6 @@ function Home() {
                         ))}
                     </div>
                 </div>
-
-                <div className="search-container">
-                    <form onSubmit={handleSubmit}>
-                        <input 
-                            type="text" 
-                            name="ticker" 
-                            placeholder="Enter ticker" 
-                            autoComplete="off"
-                        />
-                        <button type="submit">Submit</button>
-                    </form>
-                
-                    <div className="data-table">
-                        {inputTicker !== '' && inputTickerData.length === 0 && (
-                            <div className="error-message">
-                                <p>No news found or ticker doesn't exist.</p>
-                            </div>
-                        )}
-                        {inputTicker !== '' && inputTickerData.length > 0 && (
-                            <>
-                                <h2>Sentiment Score Chart for {inputTicker}</h2>
-                                <div style={{ height: '400px' }}>
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={inputTickerData}>
-                                            <CartesianGrid opacity={0.5} vertical={false} />
-                                            <XAxis
-                                                dataKey="date"
-                                                axisLine={false}
-                                                tickLine={false}
-                                                tickFormatter={(date) => format(new Date(date), 'MMM, d')}
-                                            />
-                                            <YAxis
-                                                axisLine={false}
-                                                tickLine={false}
-                                            />
-                                            <Tooltip content={CustomTooltip} />
-                                            <Bar dataKey="sentiment_score" fill="#8884d8" />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
             </StyledContainer>
         </Layout>
     );
@@ -228,12 +149,6 @@ function CustomTooltip({ active, payload, label }) {
         );
     }
 }
-
-const Layout = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-`;
 
 const NavBar = styled.div`
     display: flex;
@@ -326,28 +241,6 @@ const StyledContainer = styled.div`
                 text-align: center;
             }
         }
-    }
-
-    .search-container {
-        display: flex;
-        margin: 30px;
-        height: 500px;
-
-        border: 2px solid red;
-        border-radius: 10px;
-
-        form {
-            flex: .2;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            display: flex;
-        }
-
-        .data-table {
-            flex: 1;
-        }
-
     }
 `;
 

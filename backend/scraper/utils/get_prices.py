@@ -4,7 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 
-def is_valid_ticker(ticker):
+def get_prices(ticker):
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     browser = webdriver.Chrome(options=chrome_options)
@@ -37,4 +37,4 @@ def is_valid_ticker(ticker):
 
 if __name__ == '__main__':
     ticker = sys.argv[1]
-    is_valid_ticker(ticker)
+    get_prices(ticker)

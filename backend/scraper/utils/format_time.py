@@ -24,6 +24,7 @@ def format_time(raw_time):
         days = int(cleaned_time.split(' ')[0])
         published_date = datetime.now() - timedelta(days=days)
     else:
+        # Disregard dates past a month
         return None
 
     return published_date
