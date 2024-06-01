@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime
 from flask_caching import Cache
-from scraper.utils import get_prices, get_top_5_stocks_by_marketcap, is_valid_ticker
+from scraper.utils import get_prices, get_top_5_stocks_by_marketcap, is_valid_ticker, get_individual_data
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -80,15 +80,16 @@ def start_individual_scraper():
     ticker = request.json.get('ticker')
     if not is_valid_ticker(ticker):
         return jsonify({'message': 'Invalid ticker'}), 400
-    prices = get_prices(ticker)
-    command = f'python scraper/individual_scraper.py {ticker}'
-    process = subprocess.Popen(command, shell=True)
-    process.wait()
     
-    if process.returncode == 0:
-        return jsonify({'prices': prices}), 200
-    else:
-        return jsonify({'message': 'Individual scraper failed'}), 500
+    prices = get_prices(ticker)
+    if not prices:
+        return jsonify({'message': 'Failed to retrieve price data'}), 500
+    
+    sentiment_data = get_individual_data(ticker)
+    if not sentiment_data:
+        return jsonify({'message': 'Failed to retrieve sentiment data'}), 500
+    
+    return jsonify({'prices': prices, 'sentiment_data': sentiment_data}), 200
 
 if __name__ == '__main__':
     with app.app_context():

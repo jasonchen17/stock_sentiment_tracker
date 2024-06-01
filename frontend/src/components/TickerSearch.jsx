@@ -36,6 +36,8 @@ function TickerSearch() {
             // Update price data state
             setPriceData(response.data.prices);
 
+            // Update data state
+            setData(response.data.sentiment_data);
             
         } catch (error) {
             console.log(error);
@@ -59,11 +61,23 @@ function TickerSearch() {
             </StyledContainer>
 
             <div className="data">
-                {data.map((item) => (
-                    <tr key={item.id}>
-                        <td>{item.ticker}</td>
-                        <td>{item.date}</td>
-                        <td>{item.sentiment_score}</td>
+                {Object.entries(data).map(([ticker, sentimentData]) => (
+                    Object.entries(sentimentData).map(([date, sentimentScore]) => (
+                        <tr key={`${ticker}-${date}`}>
+                            <td>{ticker}</td>
+                            <td>{date}</td>
+                            <td>{sentimentScore}</td>
+                        </tr>
+                    ))
+                ))}
+            </div>
+
+            <div className="price">
+                {priceData.map(([ticker, date, price]) => (
+                    <tr key={`${ticker}-${date}`}>
+                        <td>{ticker}</td>
+                        <td>{date}</td>
+                        <td>{price}</td>
                     </tr>
                 ))}
             </div>
