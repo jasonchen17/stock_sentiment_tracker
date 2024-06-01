@@ -2,6 +2,7 @@ import sys
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import datetime
 
 
 def get_prices(ticker):
@@ -29,7 +30,7 @@ def get_prices(ticker):
             date = i[0].text
             close_price = i[4].text
 
-            date = date.strftime('%Y-%m-%d')
+            date = datetime.datetime.strptime(date, '%b %d, %Y').strftime('%Y-%m-%d')
             data.append((ticker, date, close_price))
 
     browser.quit()
