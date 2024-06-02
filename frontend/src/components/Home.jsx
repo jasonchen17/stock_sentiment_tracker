@@ -67,20 +67,6 @@ function Home() {
         return dateData;
     });
 
-    // Set range of y-axis for readability
-    const sentimentScores = data.map(item => item.sentiment_score);
-    const maxSentiment = Math.max(...sentimentScores.map(Math.abs));
-    const roundUp = (value) => {
-        const factor = 10 ** Math.floor(Math.log10(value));
-        const roundedValue = Math.ceil(value / factor) * factor;
-        if (roundedValue * 1.2 <= 1) {
-            return roundedValue * 1.2;
-        } else {
-            return roundedValue;
-        }
-    };
-    const roundedMaxSentiment = roundUp(maxSentiment);
-
     return (
         <Layout>
             <NavBar>
@@ -102,7 +88,7 @@ function Home() {
                                     }}
                                 />
                                 <YAxis 
-                                    domain={[-roundedMaxSentiment, roundedMaxSentiment]} 
+                                    ticks={[-1, -0.5, 0, 0.5, 1]}
                                     axisLine={false}
                                     tickLine={false}
                                 />
@@ -125,8 +111,8 @@ function Home() {
                         {topFiveStocks[0].map((stock, index) => (
                             <div key={index} className="table-row">
                                 <div className="rank-cell" style={{color: colors[index]}}>{index + 1}</div>
-            <div className="ticker-cell" style={{color: colors[index]}}>{stock}</div>
-            <div className="name-cell" style={{color: colors[index]}}>{topFiveStocks[1][index]}</div>
+                                <div className="ticker-cell" style={{color: colors[index]}}>{stock}</div>
+                                <div className="name-cell" style={{color: colors[index]}}>{topFiveStocks[1][index]}</div>
                             </div>
                         ))}
                     </div>
