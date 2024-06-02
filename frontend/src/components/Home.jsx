@@ -142,7 +142,7 @@ function CustomTooltip({ active, payload, label }) {
 const NavBar = styled.div`
     display: flex;
     width: 100%;
-    height: 100px;
+    height: 110px;
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
@@ -155,13 +155,17 @@ const StyledContainer = styled.div`
 
     @media (max-width: 768px) {
         flex-direction: column;
-        gap: 0;
+        gap: 300px;
     }
 
     .main-container {
         display: flex;
         height: 500px;
-        margin-bottom: 30px;
+        margin-bottom: 80px;
+
+        @media (max-width: 768px) {
+            flex-direction: column;
+        }
 
         .chart-container {
             display: flex;

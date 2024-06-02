@@ -72,6 +72,7 @@ function TickerSearch() {
         <Layout>
             <StyledContainer>
                 <div className="search-container">
+                    <h1>Search for a ticker</h1>
                     <form onSubmit={handleSubmit}>
                         <input 
                             type="text" 
@@ -143,16 +144,29 @@ const StyledContainer = styled.div`
     align-items: center;
     height: 500px;
 
+    @media (max-width: 768px) {
+        flex-direction: column;
+        height: 100%;
+    }
+
     .search-container {
         flex: .5;
         display: flex;
         justify-content: center;
         margin: 30px;
+        flex-direction: column;
+        align-items: center;
+
+        h1 {
+            font-size: 1rem;
+            align-self: flex-start;
+        }
 
         form {
             display: flex;
             flex-direction: column;
             gap: 10px;
+            width: 50%;
 
             input {
                 border-radius: 10px;
