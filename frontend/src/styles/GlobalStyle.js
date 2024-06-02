@@ -7,5 +7,12 @@ export const GlobalStyle = createGlobalStyle`
         box-sizing: border-box;
         list-style: none;
         font-family: Geneva, Verdana, sans-serif;
+        color: white;
+    }
+
+    html, body, #root {
+        background: #0A110C;
+        height: 100%;
+        width: 100%;
     }
 `;

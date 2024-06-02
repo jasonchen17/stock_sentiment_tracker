@@ -153,7 +153,6 @@ const StyledContainer = styled.div`
             gap: 10px;
 
             input {
-                border: none;
                 border-radius: 10px;
                 height: 40px;
                 padding: 10px;
@@ -162,9 +161,10 @@ const StyledContainer = styled.div`
             
             button {
                 border-radius: 10px;
-                border: none;
                 font-size: 1rem;
                 height: 40px;
+                color: grey;
+                cursor: pointer;
             }
         }
     }

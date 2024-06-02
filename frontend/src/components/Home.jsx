@@ -44,7 +44,7 @@ function Home() {
     }, []);
 
     // Colors for each of the top 5 stocks
-    const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'];
+    const colors = ['Red', 'Blue', 'DarkOrchid', 'Orange', 'SpringGreen'];
 
     // Create array of past 7 dates
     const currentDate = new Date();
@@ -89,7 +89,7 @@ function Home() {
             <StyledContainer>
                 <div className="main-container">
                     <div className="chart-container">
-                        <h1>Sentiment Score Chart</h1>
+                        <h1>Past 7 Sentiment Scores for Top 5 Stocks</h1>
                         <ResponsiveContainer>
                             <BarChart data={chartData}>
                                 <CartesianGrid opacity={0.5} vertical={false}/>
@@ -123,10 +123,10 @@ function Home() {
                         </div>
                         
                         {topFiveStocks[0].map((stock, index) => (
-                            <div key={index} className="table-row" color={colors[index]}>
-                                <div className="rank-cell">{index + 1}</div>
-                                <div className="ticker-cell">{stock}</div>
-                                <div className="name-cell">{topFiveStocks[1][index]}</div>
+                            <div key={index} className="table-row">
+                                <div className="rank-cell" style={{color: colors[index]}}>{index + 1}</div>
+            <div className="ticker-cell" style={{color: colors[index]}}>{stock}</div>
+            <div className="name-cell" style={{color: colors[index]}}>{topFiveStocks[1][index]}</div>
                             </div>
                         ))}
                     </div>
@@ -207,7 +207,7 @@ const StyledContainer = styled.div`
             .table-row {
                 display: flex;
                 justify-content: space-between;
-                border-bottom: 1px solid;
+                border-bottom: 2px solid;
             }
     
             .table-header {
@@ -231,6 +231,7 @@ const StyledContainer = styled.div`
             .name-cell,
             .ticker-cell {
                 margin: 10px;
+                text-align: center;
             }
         }
     
