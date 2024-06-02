@@ -3,10 +3,11 @@ import axios from 'axios';
 import styled from 'styled-components';
 import { format, eachDayOfInterval, subDays } from 'date-fns';
 import { Layout } from '../styles/Layout';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function TickerSearch() {
     // State for db sentiment data
-    const [data, setData] = useState([]);
+    const [sentimentData, setSentimentData] = useState([]);
 
     // State for input ticker
     const [inputTicker, setInputTicker] = useState('');
@@ -37,12 +38,33 @@ function TickerSearch() {
             setPriceData(response.data.prices);
 
             // Update data state
-            setData(response.data.sentiment_data);
+            setSentimentData(response.data.sentiment_data);
             
         } catch (error) {
             console.log(error);
         }
     };
+
+    const pastSevenDates = eachDayOfInterval({ start: subDays(new Date(), 7), end: subDays(new Date(), 1) })
+        .map(date => format(date, 'yyyy-MM-dd'));
+
+    const filteredSentimentData = pastSevenDates.map((date) => {
+        const sentimentDataForDate = sentimentData[inputTicker]?.[date];
+        return {
+            ticker: inputTicker,
+            date,
+            sentimentScore: sentimentDataForDate || '-',
+        };
+    });
+
+    const filteredPriceData = pastSevenDates.map((date) => {
+        const priceDataForDate = priceData.find((data) => data[1] === date);
+        return {
+            ticker: inputTicker,
+            date,
+            price: priceDataForDate?.[2] || '-',
+        };
+    });
 
     return (
         <Layout>
@@ -58,29 +80,56 @@ function TickerSearch() {
                         <button type="submit">Submit</button>
                     </form>
                 </div>
+
+                <div className="sentiment-chart">
+                <ResponsiveContainer>
+                    <LineChart data={filteredSentimentData}>
+                        <CartesianGrid vertical={false} horizontal={false}/>
+                        <XAxis 
+                            dataKey="date" 
+                            tickLine={false}
+                            tickFormatter={(date) => { 
+                                { return format(date, 'MMM, d'); }
+                            }}
+                            padding= {{ left: 50, right: 50 }}
+                        />
+                        <YAxis
+                            tickLine={false}
+                            domain={['auto', 'auto']}
+                            tickFormatter={(value) => value.toFixed(3)}
+                            padding= {{ top: 50, bottom: 50 }}
+                        />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="sentimentScore" name="Sentiment Score"/>
+                    </LineChart>
+                </ResponsiveContainer>
+                </div>
+
+                <div className="price-chart">
+                    <ResponsiveContainer>
+                        <LineChart data={filteredPriceData}>
+                            <CartesianGrid vertical={false} horizontal={false}/>
+                            <XAxis 
+                                dataKey="date"
+                                tickLine={false}
+                                tickFormatter={(date) => { 
+                                    { return format(date, 'MMM, d'); }
+                                }}
+                                padding= {{ left: 50, right: 50 }}
+                            />
+                            <YAxis
+                                tickLine={false}
+                                domain={['auto', 'auto']}
+                                padding= {{ top: 50, bottom: 50 }}
+                            />
+                            <Tooltip />
+                            <Legend />
+                            <Line type="monotone" dataKey="price" name="Stock Price"/>
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
             </StyledContainer>
-
-            <div className="data">
-                {Object.entries(data).map(([ticker, sentimentData]) => (
-                    Object.entries(sentimentData).map(([date, sentimentScore]) => (
-                        <tr key={`${ticker}-${date}`}>
-                            <td>{ticker}</td>
-                            <td>{date}</td>
-                            <td>{sentimentScore}</td>
-                        </tr>
-                    ))
-                ))}
-            </div>
-
-            <div className="price">
-                {priceData.map(([ticker, date, price]) => (
-                    <tr key={`${ticker}-${date}`}>
-                        <td>{ticker}</td>
-                        <td>{date}</td>
-                        <td>{price}</td>
-                    </tr>
-                ))}
-            </div>
         </Layout>
     );
 }
@@ -88,33 +137,54 @@ function TickerSearch() {
 const StyledContainer = styled.div`
     display: flex;
     width: 100%;
-    flex-direction: column;
-
-    @media (max-width: 768px) {
-        flex-direction: column;
-        gap: 0;
-    }
+    flex-direction: row;
+    align-items: center;
+    height: 500px;
 
     .search-container {
+        flex: .5;
         display: flex;
+        justify-content: center;
         margin: 30px;
-        height: 500px;
-
-        border: 2px solid red;
-        border-radius: 10px;
 
         form {
-            flex: .2;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
             display: flex;
-        }
+            flex-direction: column;
+            gap: 10px;
 
-        .data-table {
-            flex: 1;
+            input {
+                border: none;
+                border-radius: 10px;
+                height: 40px;
+                padding: 10px;
+                font-size: 1rem;
+            }
+            
+            button {
+                border-radius: 10px;
+                border: none;
+                font-size: 1rem;
+                height: 40px;
+            }
         }
+    }
 
+    .sentiment-chart {
+        flex: 1;
+        border: 2px solid;
+        height: 500px;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 30px;
+    }
+
+    .price-chart {
+        flex: 1;
+        border: 2px solid;
+        height: 500px;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 30px;
     }
 `;
 

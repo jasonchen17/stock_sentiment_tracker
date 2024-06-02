@@ -14,6 +14,7 @@ import {
 import styled from 'styled-components';
 import { format, eachDayOfInterval, subDays } from 'date-fns';
 import { Layout } from '../styles/Layout';
+import TickerSearch from './TickerSearch';
 
 function Home() {
     const [data, setData] = useState([]);
@@ -130,6 +131,8 @@ function Home() {
                         ))}
                     </div>
                 </div>
+
+                <TickerSearch />
             </StyledContainer>
         </Layout>
     );
@@ -172,6 +175,7 @@ const StyledContainer = styled.div`
     .main-container {
         display: flex;
         height: 500px;
+        margin-bottom: 30px;
 
         .chart-container {
             display: flex;
