@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import { format, eachDayOfInterval, subDays } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Layout } from '../styles/Layout';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -45,10 +45,12 @@ function TickerSearch() {
         }
     };
 
-    const pastSevenDates = eachDayOfInterval({ start: subDays(new Date(), 7), end: subDays(new Date(), 1) })
-        .map(date => format(date, 'yyyy-MM-dd'));
+    const pastSevenDatesFromPriceData = priceData
+        .slice(0, 7)
+        .reverse()
+        .map((data) => data[1]);
 
-    const filteredSentimentData = pastSevenDates.map((date) => {
+    const filteredSentimentData = pastSevenDatesFromPriceData.map((date) => {
         const sentimentDataForDate = sentimentData[inputTicker]?.[date];
         return {
             ticker: inputTicker,
@@ -56,8 +58,8 @@ function TickerSearch() {
             sentimentScore: sentimentDataForDate || '-',
         };
     });
-
-    const filteredPriceData = pastSevenDates.map((date) => {
+          
+    const filteredPriceData = pastSevenDatesFromPriceData.map((date) => {
         const priceDataForDate = priceData.find((data) => data[1] === date);
         return {
             ticker: inputTicker,
@@ -89,7 +91,7 @@ function TickerSearch() {
                             dataKey="date" 
                             tickLine={false}
                             tickFormatter={(date) => { 
-                                { return format(date, 'MMM, d'); }
+                                { return format(parseISO(date), 'MMM, d'); }
                             }}
                             padding= {{ left: 50, right: 50 }}
                         />
@@ -114,7 +116,7 @@ function TickerSearch() {
                                 dataKey="date"
                                 tickLine={false}
                                 tickFormatter={(date) => { 
-                                    { return format(date, 'MMM, d'); }
+                                    { return format(parseISO(date), 'MMM, d'); }
                                 }}
                                 padding= {{ left: 50, right: 50 }}
                             />
