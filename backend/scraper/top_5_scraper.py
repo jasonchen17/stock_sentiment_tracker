@@ -4,7 +4,8 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from utils import get_top_5_stocks_by_marketcap, format_time
+from utils import get_top_5_stocks_by_marketcap, format_time, further_search
+from datetime import datetime, timedelta
 
 async def get_sentiment_data():
     tickers = get_top_5_stocks_by_marketcap()[0]
@@ -45,6 +46,8 @@ async def get_sentiment_data():
 
     async with aiohttp.ClientSession() as session:
         for ticker, news_items in news.items():
+            last_date = None
+
             for item in news_items:
                 title_tag = item.find('h3')
                 time_tag = item.find('div', class_='publishing')
@@ -57,6 +60,8 @@ async def get_sentiment_data():
 
                 if not date:
                     continue
+
+                last_date = date
                 
                 date = date.strftime('%Y-%m-%d')
 
@@ -65,6 +70,9 @@ async def get_sentiment_data():
                 if date not in sentiment_data[ticker]:
                     sentiment_data[ticker][date] = []
                 sentiment_data[ticker][date].append(sentiment_score)
+
+            if datetime.now().date() - last_date.date() < timedelta(days=8):
+                await further_search(ticker)
 
         for ticker in sentiment_data:
             for date in sentiment_data[ticker]:

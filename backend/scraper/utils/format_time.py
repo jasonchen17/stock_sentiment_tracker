@@ -5,7 +5,7 @@ def format_time(raw_time):
     if '•' not in raw_time:
         return None
 
-    time_parts= raw_time.split('•')
+    time_parts = raw_time.split('•')
 
     if len(time_parts) > 1:
         cleaned_time = time_parts[-1].strip()
