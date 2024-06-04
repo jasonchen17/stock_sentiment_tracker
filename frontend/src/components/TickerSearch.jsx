@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { format, parseISO } from 'date-fns';
 import { Layout } from '../styles/Layout';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { toast } from 'react-hot-toast';
 
 function TickerSearch() {
     const [sentimentData, setSentimentData] = useState([]);
@@ -33,6 +34,7 @@ function TickerSearch() {
             setSentimentData(response.data.sentiment_data);
         } catch (error) {
             console.log(error);
+            toast.error('Failed to load data. Please try again.');
         } finally {
             submitButton.disabled = false;
             submitButton.classList.remove("btn--running");
