@@ -68,8 +68,6 @@ function TickerSearch() {
         };
     });
 
-    console.log(filteredPriceData);
-
     return (
         <Layout>
             <StyledContainer>
@@ -87,59 +85,88 @@ function TickerSearch() {
                 </div>
 
                 <div className="sentiment-chart">
-                <ResponsiveContainer>
-                    <LineChart data={filteredSentimentData}>
-                        <CartesianGrid vertical={false} horizontal={false}/>
-                        <XAxis 
-                            dataKey="date" 
-                            tickLine={false}
-                            tickFormatter={(date) => { 
-                                { return format(parseISO(date), 'MMM, d'); }
-                            }}
-                            padding= {{ left: 50, right: 50 }}
-                        />
-                        <YAxis
-                            tickLine={false}
-                            domain={['auto', 'auto']}
-                            tickFormatter={(value) => value.toFixed(3)}
-                            padding= {{ top: 50, bottom: 50 }}
-                            width={100}
-                        />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="sentimentScore" name="Sentiment Score"/>
-                    </LineChart>
-                </ResponsiveContainer>
+                    <h1>Sentiment Score History</h1>
+                    {filteredSentimentData.length > 0 && (
+                        <ResponsiveContainer>
+                            <LineChart data={filteredSentimentData}>
+                                <CartesianGrid vertical={false} horizontal={false}/>
+                                <XAxis 
+                                    dataKey="date" 
+                                    tickLine={false}
+                                    tickFormatter={(date) => { 
+                                        { return format(parseISO(date), 'MMM, d'); }
+                                    }}
+                                    padding= {{ left: 50, right: 50 }}
+                                    height={30}
+                                />
+                                <YAxis
+                                    tickLine={false}
+                                    domain={['auto', 'auto']}
+                                    tickFormatter={(value) => value.toFixed(3)}
+                                    padding= {{ top: 50, bottom: 50 }}
+                                    width={100}
+                                />
+                                <Tooltip content={ SentimentTooltip } />
+                                <Line type="monotone" dataKey="sentimentScore" name="Sentiment Score"/>
+                            </LineChart>
+                        </ResponsiveContainer>
+                    )}
                 </div>
-
+                
                 <div className="price-chart">
-                    <ResponsiveContainer>
-                        <LineChart data={filteredPriceData}>
-                            <CartesianGrid vertical={false} horizontal={false}/>
-                            <XAxis 
-                                dataKey="date"
-                                tickLine={false}
-                                tickFormatter={(date) => { 
-                                    { return format(parseISO(date), 'MMM, d'); }
-                                }}
-                                padding= {{ left: 50, right: 50 }}
-                            />
-                            <YAxis
-                                tickLine={false}
-                                domain={['auto', 'auto']}
-                                padding= {{ top: 50, bottom: 50 }}
-                                tickFormatter={(value) => `$${value.toFixed(2)}`}
-                                width={100}
-                            />
-                            <Tooltip />
-                            <Legend />
-                            <Line type="monotone" dataKey="price" name="Stock Price"/>
-                        </LineChart>
-                    </ResponsiveContainer>
+                    <h1>Stock Price History</h1>
+                    {filteredPriceData.length > 0 && (
+                        <ResponsiveContainer>
+                            <LineChart data={filteredPriceData}>
+                                <CartesianGrid vertical={false} horizontal={false}/>
+                                <XAxis 
+                                    dataKey="date"
+                                    tickLine={false}
+                                    tickFormatter={(date) => { 
+                                        { return format(parseISO(date), 'MMM, d'); }
+                                    }}
+                                    padding= {{ left: 50, right: 50 }}
+                                    height={30}
+                                />
+                                <YAxis
+                                    tickLine={false}
+                                    domain={['auto', 'auto']}
+                                    padding= {{ top: 50, bottom: 50 }}
+                                    tickFormatter={(value) => `$${value.toFixed(2)}`}
+                                    width={100}
+                                />
+                                <Tooltip content={ PriceTooltip } />
+                                <Line type="monotone" dataKey="price" name="Stock Price"/>
+                            </LineChart>
+                        </ResponsiveContainer>
+                    )}
                 </div>
             </StyledContainer>
         </Layout>
     );
+}
+
+function SentimentTooltip({ active, payload, label }) {
+    if (active) {
+        const score = payload[0].value;
+        return (
+            <div className="tooltip">
+                <h4>{format(parseISO(label), "eeee, d MMM, yyyy")}</h4>
+                <p>{`Sentiment Score: ${typeof score === 'number' ? score.toFixed(4) : score}`}</p>
+            </div>
+        );
+    }
+}
+
+function PriceTooltip({ active, payload, label }) {
+    if (active) {
+        return (
+            <div className="tooltip">
+                <h4>{format(parseISO(label), "eeee, d MMM, yyyy")}</h4>
+                <p>{`Stock Price: $${payload[0].value.toFixed(2)}`}</p>
+            </div>
+        );
+    }
 }
 
 const StyledContainer = styled.div`
@@ -192,20 +219,37 @@ const StyledContainer = styled.div`
 
     .sentiment-chart {
         flex: 1;
+        display: flex;
+        flex-direction: column;
         border: 2px solid;
         height: 500px;
         border-radius: 10px;
         padding: 20px;
         margin: 30px;
+        padding-top: 0;
     }
 
     .price-chart {
         flex: 1;
+        display: flex;
+        flex-direction: column;
         border: 2px solid;
         height: 500px;
         border-radius: 10px;
         padding: 20px;
         margin: 30px;
+        padding-top: 0;
+    }
+    
+    .tooltip {
+        background-color: DarkSlateGrey;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: left;
+
+        h4 {
+            margin-bottom: 10px;
+        }
     }
 `;
 

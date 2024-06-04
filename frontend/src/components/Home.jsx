@@ -131,7 +131,7 @@ function CustomTooltip({ active, payload, label }) {
                 <h4>{format(label, "eeee, d MMM, yyyy")}</h4>
                 {payload.map((stock, index) => (
                     <p key={index} style={{ color: stock.color }}>
-                        {stock.name}: {stock.value}
+                        {stock.name}: {stock.value.toFixed(4)}
                     </p>
                 ))}
             </div>
@@ -231,15 +231,16 @@ const StyledContainer = styled.div`
             text-align: left;
             margin: 100px;
             margin-top: 50px;
-            h4 {
-                margin-bottom: 10px;
-                text-align: center;
-            }
-        }
-
-        .tooltip {
             background-color: DarkSlateGrey;
             border-radius: 10px;
+
+            h4 {
+                margin-bottom: 10px;
+            }
+
+            p {
+                margin-bottom: 5px;
+            }
         }
     }
 `;

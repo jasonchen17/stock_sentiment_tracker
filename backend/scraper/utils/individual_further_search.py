@@ -11,7 +11,7 @@ def format_time(raw_time):
     # ',' means date is in format 'month day, past year'
     if ',' in raw_time:
         return None
-    if 'hours' in time_parts or 'minutes' in time_parts:
+    if 'hour' in time_parts or 'hours' in time_parts or 'minutes' in time_parts:
         published_date = datetime.now()
     elif 'Yesterday' in time_parts:
         published_date = datetime.now() - timedelta(days=1)
@@ -19,7 +19,10 @@ def format_time(raw_time):
         days = int(time_parts[0])
         published_date = datetime.now() - timedelta(days=days)
     else:
-        published_date = datetime.strptime(raw_time + f' {datetime.now().year}', "%b %d %Y").date()
+        try:
+            published_date = datetime.strptime(raw_time + f' {datetime.now().year}', "%b %d %Y").date()
+        except ValueError:
+            return None
 
     return published_date
 
