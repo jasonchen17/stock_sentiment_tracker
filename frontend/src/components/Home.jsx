@@ -62,7 +62,7 @@ function Home() {
                     stockData = item;
                 }
             });
-            dateData[stock] = stockData ? stockData.sentiment_score : 0;
+            dateData[stock] = stockData ? stockData.sentiment_score : '-';
         });
         return dateData;
     });
@@ -128,10 +128,10 @@ function CustomTooltip({ active, payload, label }) {
     if (active) {
         return (
             <div className="tooltip">
-                <h4>{format(label, "eeee, d MMM, yyyy")}</h4>
+                <h4>{format(parseISO(label), "eeee, d MMM, yyyy")}</h4>
                 {payload.map((stock, index) => (
                     <p key={index} style={{ color: stock.color }}>
-                        {stock.name}: {stock.value.toFixed(4)}
+                        {stock.name}: {typeof stock.value === 'number' ? stock.value.toFixed(4) : stock.value}
                     </p>
                 ))}
             </div>
