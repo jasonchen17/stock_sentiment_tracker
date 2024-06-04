@@ -64,9 +64,11 @@ function TickerSearch() {
         return {
             ticker: inputTicker,
             date,
-            price: priceDataForDate?.[2] || '-',
+            price: priceDataForDate?.[2] ? parseFloat(priceDataForDate[2].replace(',', '')) : null,
         };
     });
+
+    console.log(filteredPriceData);
 
     return (
         <Layout>
@@ -101,6 +103,7 @@ function TickerSearch() {
                             domain={['auto', 'auto']}
                             tickFormatter={(value) => value.toFixed(3)}
                             padding= {{ top: 50, bottom: 50 }}
+                            width={100}
                         />
                         <Tooltip />
                         <Legend />
@@ -125,6 +128,8 @@ function TickerSearch() {
                                 tickLine={false}
                                 domain={['auto', 'auto']}
                                 padding= {{ top: 50, bottom: 50 }}
+                                tickFormatter={(value) => `$${value.toFixed(2)}`}
+                                width={100}
                             />
                             <Tooltip />
                             <Legend />

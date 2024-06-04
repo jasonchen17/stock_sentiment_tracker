@@ -4,3 +4,4 @@ from .is_valid_ticker import is_valid_ticker
 from .format_time import format_time
 from .get_individual_data import get_individual_data
 from .further_search import further_search
+from .individual_further_search import individual_further_search

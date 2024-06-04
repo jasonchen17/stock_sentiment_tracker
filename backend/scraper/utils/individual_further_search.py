@@ -3,15 +3,32 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from . import format_time, individual_further_search
 from datetime import datetime, timedelta
 
-def get_individual_data(ticker):
+def format_time(raw_time):
+    time_parts = raw_time.split()
+
+    # ',' means date is in format 'month day, past year'
+    if ',' in raw_time:
+        return None
+    if 'hours' in time_parts or 'minutes' in time_parts:
+        published_date = datetime.now()
+    elif 'Yesterday' in time_parts:
+        published_date = datetime.now() - timedelta(days=1)
+    elif 'days' in time_parts:
+        days = int(time_parts[0])
+        published_date = datetime.now() - timedelta(days=days)
+    else:
+        published_date = datetime.strptime(raw_time + f' {datetime.now().year}', "%b %d %Y").date()
+
+    return published_date
+
+def individual_further_search(ticker):
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     browser = webdriver.Chrome(options=chrome_options)
 
-    url = f'https://finance.yahoo.com/quote/{ticker}/news'
+    url = f'https://news.google.com/search?q={ticker}'
 
     browser.get(url)
 
@@ -28,7 +45,7 @@ def get_individual_data(ticker):
 
     soup = BeautifulSoup(html, 'html.parser')
 
-    news_items = soup.find_all('li', class_='stream-item')
+    news_items = soup.find_all('c-wiz', {'jsrenderer': 'ARwRbe'})
 
     browser.quit()
 
@@ -36,12 +53,10 @@ def get_individual_data(ticker):
 
     vader = SentimentIntensityAnalyzer()
 
-    last_date = None
-
     for item in news_items:
-        title_tag = item.find('h3')
-        time_tag = item.find('div', class_='publishing')
-    
+        title_tag = item.find(class_='JtKRv')
+        time_tag = item.find(class_='hvbAAd')
+
         if not title_tag or not time_tag:
             continue
 
@@ -50,9 +65,7 @@ def get_individual_data(ticker):
 
         if not date:
             continue
-
-        last_date = date
-
+        
         date = date.strftime('%Y-%m-%d')
 
         sentiment_score = vader.polarity_scores(title)['compound']
@@ -61,20 +74,8 @@ def get_individual_data(ticker):
             sentiment_data[ticker][date] = []
         sentiment_data[ticker][date].append(sentiment_score)
 
-    if datetime.now().date() - last_date.date() < timedelta(days=11):
-            further_sentiment_data = individual_further_search.individual_further_search(ticker)
-            for date, scores in further_sentiment_data[ticker].items():
-                if date not in sentiment_data[ticker]:
-                    sentiment_data[ticker][date] = []
-                sentiment_data[ticker][date].extend(scores)
-
-    for date in sentiment_data[ticker]:
-        scores = sentiment_data[ticker][date]
-        mean_score = sum(scores) / len(scores)
-        sentiment_data[ticker][date] = mean_score
-
-    return(sentiment_data)
+    return sentiment_data
 
 if __name__ == '__main__':
     ticker = sys.argv[1]
-    get_individual_data(ticker)
+    individual_further_search(ticker)
