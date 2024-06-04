@@ -12,7 +12,7 @@ import {
     ResponsiveContainer,
 } from 'recharts';
 import styled from 'styled-components';
-import { format, eachDayOfInterval, subDays } from 'date-fns';
+import { format, eachDayOfInterval, subDays, parseISO } from 'date-fns';
 import { Layout } from '../styles/Layout';
 import TickerSearch from './TickerSearch';
 
@@ -84,7 +84,7 @@ function Home() {
                                     axisLine={false}
                                     tickLine={false}
                                     tickFormatter={(date) => { 
-                                        { return format(date, 'MMM, d'); }
+                                        { return format(parseISO(date), 'MMM, d'); }
                                     }}
                                 />
                                 <YAxis 
@@ -92,7 +92,7 @@ function Home() {
                                     axisLine={false}
                                     tickLine={false}
                                 />
-                                <Tooltip content={CustomTooltip} />
+                                <Tooltip content={CustomTooltip} cursor={{fill: 'DarkSlateGrey'}}/>
                                 {topFiveStocks[0].map((stock, index) => (
                                     <Bar key={index} dataKey={stock} fill={colors[index]} />
                                 ))}
@@ -235,6 +235,11 @@ const StyledContainer = styled.div`
                 margin-bottom: 10px;
                 text-align: center;
             }
+        }
+
+        .tooltip {
+            background-color: DarkSlateGrey;
+            border-radius: 10px;
         }
     }
 `;
