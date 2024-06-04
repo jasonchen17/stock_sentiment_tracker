@@ -48,7 +48,7 @@ function Home() {
 
     // Create array of past 7 dates
     const currentDate = new Date();
-    const pastSevenDates = eachDayOfInterval({ start: subDays(currentDate, 7), end: subDays(currentDate, 1) })
+    const pastSevenDates = eachDayOfInterval({ start: subDays(currentDate, 6), end: currentDate })
         .map(date => format(date, 'yyyy-MM-dd'));
 
     const chartData = pastSevenDates.map((date) => {
