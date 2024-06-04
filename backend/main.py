@@ -40,6 +40,16 @@ def start_top_5_scraper():
 def submit_sentiment():
     data = request.json
 
+    existing_sentiment = Sentiment.query.filter_by(ticker=data.get('ticker'), date=datetime.strptime(data.get('date'), '%Y-%m-%d')).first()
+
+    if existing_sentiment:
+        if existing_sentiment.sentiment_score != 0:
+            return jsonify({'message': 'Sentiment data already exists for the given ticker and date'}), 400
+        else:
+            existing_sentiment.sentiment_score = data.get('sentiment_score')
+            db.session.commit()
+            return jsonify({'message': 'Sentiment data updated successfully'}), 200
+
     sentiment = Sentiment(
         ticker = data.get('ticker'),
         date = datetime.strptime(data.get('date'), '%Y-%m-%d'),
