@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import { format, parseISO } from 'date-fns';
@@ -6,42 +6,36 @@ import { Layout } from '../styles/Layout';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function TickerSearch() {
-    // State for db sentiment data
     const [sentimentData, setSentimentData] = useState([]);
-
-    // State for input ticker
     const [inputTicker, setInputTicker] = useState('');
-
-    // State for price data
     const [priceData, setPriceData] = useState([]);
 
-    // Handle submit form
+    const submitButtonRef = useRef(null);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Get input ticker from state
+        const submitButton = submitButtonRef.current;
+        submitButton.disabled = true;
+        submitButton.classList.add("btn--running");
+
         const inputTicker = e.target.elements.ticker.value;
+        setSentimentData([]);
+        setPriceData([]);
 
         try {
-            // Update inputTicker
             setInputTicker(inputTicker);
-      
-            // Start individual scraper which returns price data
             const response = await axios.post('http://localhost:5000/start-individual-scraper', {
                 ticker: inputTicker,
             });
-
-            // Log message from response
             console.log(response.data.message);
-
-            // Update price data state
             setPriceData(response.data.prices);
-
-            // Update data state
             setSentimentData(response.data.sentiment_data);
-            
         } catch (error) {
             console.log(error);
+        } finally {
+            submitButton.disabled = false;
+            submitButton.classList.remove("btn--running");
         }
     };
 
@@ -58,7 +52,7 @@ function TickerSearch() {
             sentimentScore: sentimentDataForDate || '-',
         };
     });
-          
+
     const filteredPriceData = pastSevenDatesFromPriceData.map((date) => {
         const priceDataForDate = priceData.find((data) => data[1] === date);
         return {
@@ -72,15 +66,18 @@ function TickerSearch() {
         <Layout>
             <StyledContainer>
                 <div className="search-container">
-                    <h1>Search for a ticker</h1>
+                    <h1>Lookup Stock</h1>
                     <form onSubmit={handleSubmit}>
                         <input 
                             type="text" 
-                            name="ticker" 
-                            placeholder="Enter ticker" 
+                            name="ticker"
                             autoComplete="off"
+                            placeholder="Enter Ticker"
                         />
-                        <button type="submit">Submit</button>
+                        <button type="submit" className="loader-button" ref={submitButtonRef}>
+                            <span className="btn__text">Submit</span>
+                            <div className="loader"></div>
+                        </button>
                     </form>
                 </div>
 
@@ -94,7 +91,7 @@ function TickerSearch() {
                                     dataKey="date" 
                                     tickLine={false}
                                     tickFormatter={(date) => { 
-                                        { return format(parseISO(date), 'MMM, d'); }
+                                        return format(parseISO(date), 'MMM, d');
                                     }}
                                     padding= {{ left: 50, right: 50 }}
                                     height={30}
@@ -123,7 +120,7 @@ function TickerSearch() {
                                     dataKey="date"
                                     tickLine={false}
                                     tickFormatter={(date) => { 
-                                        { return format(parseISO(date), 'MMM, d'); }
+                                        return format(parseISO(date), 'MMM, d');
                                     }}
                                     padding= {{ left: 50, right: 50 }}
                                     height={30}
@@ -187,11 +184,13 @@ const StyledContainer = styled.div`
         justify-content: center;
         margin: 30px;
         flex-direction: column;
-        align-items: center;
+        align-items: flex-start;
 
         h1 {
-            font-size: 1rem;
+            font-size: 1.5rem;
             align-self: flex-start;
+            margin-bottom: 10px;
+            margin-left: 100px;
         }
 
         form {
@@ -199,20 +198,77 @@ const StyledContainer = styled.div`
             flex-direction: column;
             gap: 10px;
             width: 50%;
+            margin-left: 100px;
 
             input {
-                border-radius: 10px;
-                height: 40px;
-                padding: 10px;
+                border-radius: 24px;
+                height: 48px;
+                padding-left: 25px;
                 font-size: 1rem;
+                border: none;
+                border: 2px solid;
+                background-color: #0A110C;
             }
-            
-            button {
-                border-radius: 10px;
-                font-size: 1rem;
-                height: 40px;
-                color: grey;
+
+            input:focus {
+                outline: none;
+            }
+
+            input:focus::placeholder {
+                color: transparent;
+            }
+
+            .loader-button {
+                height: 48px;
+                border: 2px solid;
+                border-radius: 24px;
+                font-family: inherit;
                 cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                background-color: DarkSlateGrey;
+
+                .btn__text {
+                    font-size: 1rem;
+                    font-weight: 600;
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
+                }
+
+                &.btn--running {
+                    cursor: default;
+
+                    .btn__text {
+                        visibility: hidden;
+                    }
+
+                    .loader {
+                        visibility: visible;
+                    }
+                }
+
+                .loader {
+                    width: 30px;
+                    height: 30px;
+                    border: 5px solid;
+                    border-top-color: #009578;
+                    border-radius: 50%;
+                    animation: loading 0.75s ease infinite;
+                    visibility: hidden;
+                }
+    
+                @keyframes loading {
+                    from {
+                        transform: rotate(0turn);
+                    }
+                    to {
+                        transform: rotate(1turn);
+                    }
+                }
             }
         }
     }
@@ -240,7 +296,7 @@ const StyledContainer = styled.div`
         margin: 30px;
         padding-top: 0;
     }
-    
+
     .tooltip {
         background-color: DarkSlateGrey;
         border-radius: 10px;

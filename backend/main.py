@@ -88,7 +88,7 @@ def top_5_stocks():
 @app.route('/start-individual-scraper', methods=['POST'])
 def start_individual_scraper():
     ticker = request.json.get('ticker')
-    if not is_valid_ticker(ticker):
+    if not ticker or not is_valid_ticker(ticker):
         return jsonify({'message': 'Invalid ticker'}), 400
     
     prices = get_prices(ticker)
