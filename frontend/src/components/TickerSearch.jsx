@@ -112,6 +112,8 @@ function TickerSearch() {
                 <XAxis
                   dataKey="date"
                   tickLine={false}
+                  axisLine={{ stroke: 'white' }}
+                  tick={{ fill: 'white' }}
                   tickFormatter={(date) => {
                     return format(parseISO(date), "MMM, d");
                   }}
@@ -121,6 +123,8 @@ function TickerSearch() {
                 <YAxis
                   tickLine={false}
                   domain={["auto", "auto"]}
+                  axisLine={{ stroke: 'white' }}
+                  tick={{ fill: 'white' }}
                   tickFormatter={(value) => value.toFixed(3)}
                   padding={{ top: 50, bottom: 50 }}
                   width={100}
@@ -145,6 +149,8 @@ function TickerSearch() {
                 <XAxis
                   dataKey="date"
                   tickLine={false}
+                  axisLine={{ stroke: 'white' }}
+                  tick={{ fill: 'white' }}
                   tickFormatter={(date) => {
                     return format(parseISO(date), "MMM, d");
                   }}
@@ -153,8 +159,10 @@ function TickerSearch() {
                 />
                 <YAxis
                   tickLine={false}
+                  axisLine={{ stroke: 'white' }}
                   domain={["auto", "auto"]}
                   padding={{ top: 50, bottom: 50 }}
+                  tick={{ fill: 'white' }}
                   tickFormatter={(value) => `$${value.toFixed(2)}`}
                   width={100}
                 />

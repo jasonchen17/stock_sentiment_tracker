@@ -82,11 +82,12 @@ function Home() {
             <h1>Past 7 Sentiment Scores for Top 5 Stocks</h1>
             <ResponsiveContainer>
               <BarChart data={chartData}>
-                <CartesianGrid opacity={0.5} vertical={false} />
+                <CartesianGrid stroke="white" opacity={0.5} vertical={false} />
                 <XAxis
                   dataKey="date"
                   axisLine={false}
                   tickLine={false}
+                  tick={{ fill: 'white' }}
                   tickFormatter={(date) => {
                     {
                       return format(parseISO(date), "MMM, d");
@@ -97,6 +98,7 @@ function Home() {
                   ticks={[-1, -0.5, 0, 0.5, 1]}
                   axisLine={false}
                   tickLine={false}
+                  tick={{ fill: 'white' }}
                 />
                 <Tooltip
                   content={CustomTooltip}
