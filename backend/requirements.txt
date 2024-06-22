@@ -1,7 +1,8 @@
-flask
-flask_sqlalchemy
-flask_cors
-flask_caching
+Flask
+Flask-SQLAlchemy
+Flask-CORS
+Flask-Caching
+Flask-APScheduler
 python-dotenv
 aiohttp
 beautifulsoup4

@@ -12,6 +12,7 @@ from scraper.utils import (
     get_individual_data,
 )
 from dotenv import load_dotenv
+from flask_apscheduler import APScheduler
 
 app = Flask(__name__)
 
@@ -25,6 +26,10 @@ db = SQLAlchemy(app)
 
 cache = Cache(app, config={"CACHE_TYPE": "SimpleCache"})
 
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+
 
 class Sentiment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -36,6 +41,19 @@ class Sentiment(db.Model):
         self.ticker = ticker
         self.date = date
         self.sentiment_score = sentiment_score
+
+
+def run_scheduled_top_5_scraper():
+    command = "python scraper/top_5_scraper.py"
+    subprocess.Popen(command, shell=True)
+    app.logger.info("Scheduled scraper started successfully")
+
+
+# Run scraper at 12:00 AM every day
+@scheduler.task('cron', id='scheduled_top_5_scraper', hour=0)
+def scheduled_top_5_scraper():
+    with app.app_context():
+        run_scheduled_top_5_scraper()
 
 
 @app.route("/start-top-5-scraper", methods=["POST"])
