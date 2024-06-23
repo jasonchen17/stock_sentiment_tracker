@@ -74,7 +74,7 @@ function Home() {
   return (
     <Layout>
       <NavBar>
-        <h1>Stock Sentiment Analysis</h1>
+        <h1>Stock Sentiment Tracker</h1>
       </NavBar>
       <StyledContainer>
         <div className="main-container">
