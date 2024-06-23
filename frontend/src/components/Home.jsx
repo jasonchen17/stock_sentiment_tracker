@@ -7,8 +7,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
-  Rectangle,
   ResponsiveContainer,
 } from "recharts";
 import styled from "styled-components";
@@ -46,7 +44,13 @@ function Home() {
   }, []);
 
   // Colors for each of the top 5 stocks
-  const colors = ["Red", "Blue", "DarkOrchid", "Orange", "SpringGreen"];
+  const colors = [
+    "FireBrick",
+    "Blue",
+    "BlueViolet",
+    "SandyBrown",
+    "ForestGreen",
+  ];
 
   const currentDate = new Date();
   const pastSevenDates = eachDayOfInterval({
@@ -87,7 +91,7 @@ function Home() {
                   dataKey="date"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: 'white' }}
+                  tick={{ fill: "white" }}
                   tickFormatter={(date) => {
                     {
                       return format(parseISO(date), "MMM, d");
@@ -98,7 +102,7 @@ function Home() {
                   ticks={[-1, -0.5, 0, 0.5, 1]}
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: 'white' }}
+                  tick={{ fill: "white" }}
                 />
                 <Tooltip
                   content={CustomTooltip}
