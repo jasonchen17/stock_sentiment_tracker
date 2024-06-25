@@ -3,7 +3,7 @@
 ## Description
 This project is a stock sentiment analysis dashboard built with React that visualizes sentiment scores for the top five stocks over the past seven days. It fetches data from a backend API and displays the information using a bar chart and a table. The dashboard provides a clear and interactive way to monitor stock sentiment trends.
 
-![home](https://github.com/jasonchen17/stock_sentiment_tracker/blob/main/screenshots/home.png?raw=true)
+![Home](https://github.com/jasonchen17/stock_sentiment_tracker/blob/main/screenshots/home.png?raw=true)
 
 ## Built With
 - **Frontend**: React, Vite, Styled Components
