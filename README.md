@@ -1,7 +1,7 @@
 # Stock Sentiment Tracker
 
 ## Description
-A stock sentiment analysis tracker based on news scraped from Yahoo Finance and Google News. Easily view weekly sentiment scores for top stocks and look up stock sentiments for individual tickers.
+A stock sentiment analysis tracker based on news scraped from Yahoo Finance and Google News. Easily view weekly sentiment scores for top stocks and search stock sentiments for individual tickers.
 
 ![home](https://github.com/jasonchen17/stock_sentiment_tracker/blob/main/screenshots/home.png?raw=true)
 
